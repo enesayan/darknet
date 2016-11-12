@@ -25,9 +25,9 @@ def convert(size, box):
     return (x, y, w, h)
 
 
-def convert_annotation(label_dir, label_file, img_id):
+def convert_annotation(label, label_dir, label_file, img_id):
     in_file = open('%s/%s' % (label_dir, label_file))
-    out_file = open('list/%s.txt' % img_id, 'w')
+    out_file = open('labels/%s/%s.txt' % (label, img_id), 'w')
     tree = ET.parse(in_file)
     root = tree.getroot()
     size = root.find('size')
@@ -37,9 +37,12 @@ def convert_annotation(label_dir, label_file, img_id):
     for obj in root.iter('object'):
         difficult = obj.find('difficult').text
         cls = obj.find('name').text
-        if cls not in label_numbers or int(difficult) == 1:
+        if (cls not in labels and cls not in label_numbers) or int(difficult) == 1:
             continue
-        cls_id = label_numbers.index(cls)
+        if cls in labels:
+            cls_id = labels.index(cls)
+        if cls in label_numbers:
+            cls_id = label_numbers.index(cls)
         xmlbox = obj.find('bndbox')
         b = (float(xmlbox.find('xmin').text),
              float(xmlbox.find('xmax').text),
@@ -51,22 +54,23 @@ def convert_annotation(label_dir, label_file, img_id):
 
 if __name__ == "__main__":
     pwd = getcwd()
-    if not os.path.exists('list/'):
-        os.makedirs('list/')
+    if not os.path.exists('labels/'):
+        os.makedirs('labels/')
+    list_file = open('train.txt', 'w')
     for label in labels:
-        label_dir = 'Annotation/%s' % label_dict[label]
-        img_dir = 'Images/%s' % label_dict[label]
+        if not os.path.exists('labels/%s' % label):
+            os.makedirs('labels/%s' % label)
+        label_dir = 'annotations/%s' % label
+        img_dir = 'images/%s' % label
         label_files = listdir(label_dir)
         img_files = listdir(img_dir)
         # Remove those not in Images
         label_files = [x for x in label_files
                        if x.split('.')[0] + '.JPEG' in img_files]
 
-        list_file = open('%s.txt' % label, 'w')
         for label_file in label_files:
             img_id = label_file.split('.')[0]
             img_path = '%s/%s/%s\n' % (pwd, img_dir, img_id + '.JPEG')
             list_file.write(img_path)
-            convert_annotation(label_dir, label_file, img_id)
-        list_file.close()
-
+            convert_annotation(label, label_dir, label_file, img_id)
+    list_file.close()
