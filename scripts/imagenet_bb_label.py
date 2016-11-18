@@ -6,9 +6,9 @@ from os import listdir, getcwd
 from os.path import join
 
 labels = ['ball', 'goal', 'robot']
-label_numbers = ['n04254680', 'n03820318', 'n02710201']
-label_dict = dict(zip(labels, label_numbers))
-label_number_dict = dict(zip(label_numbers, labels))
+# label_numbers = ['n04254680', 'n03820318', 'n02710201']
+# label_dict = dict(zip(labels, label_numbers))
+# label_number_dict = dict(zip(label_numbers, labels))
 
 
 def convert(size, box):
@@ -37,12 +37,13 @@ def convert_annotation(label, label_dir, label_file, img_id):
     for obj in root.iter('object'):
         difficult = obj.find('difficult').text
         cls = obj.find('name').text
-        if (cls not in labels and cls not in label_numbers) or int(difficult) == 1:
+        # if (cls not in labels and cls not in label_numbers) or int(difficult) == 1:
+        if cls not in labels  or int(difficult) == 1:
             continue
         if cls in labels:
             cls_id = labels.index(cls)
-        if cls in label_numbers:
-            cls_id = label_numbers.index(cls)
+        # if cls in label_numbers:
+        #     cls_id = label_numbers.index(cls)
         xmlbox = obj.find('bndbox')
         b = (float(xmlbox.find('xmin').text),
              float(xmlbox.find('xmax').text),
