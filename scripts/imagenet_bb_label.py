@@ -38,7 +38,7 @@ def convert_annotation(label, label_dir, label_file, img_id):
         difficult = obj.find('difficult').text
         cls = obj.find('name').text
         # if (cls not in labels and cls not in label_numbers) or int(difficult) == 1:
-        if cls not in labels  or int(difficult) == 1:
+        if cls not in labels or int(difficult) == 1:
             continue
         if cls in labels:
             cls_id = labels.index(cls)
